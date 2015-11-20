@@ -26,8 +26,8 @@ function checkLine(line){
 	if(commentStart) seekCommentEnd(line);
 	checkForComment(line);
 
-	var prolog = new RegExp("<?xml%20[a-zA-Z]+");
-	if(prolog.test(line)
+	var prolog = new RegExp("((\<\!\-\-)([^\-\-\>])*(\-\-\>))*\<\?xml\s+version="[0-9]*.[0-9]*"\s*\?\>");
+	if(prolog.test(line))
 	{
 
 	}
