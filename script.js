@@ -1,4 +1,9 @@
 $( document ).ready(function() {
+	//global regex
+	prolog = new RegExp("\<\?xml\s+version="[0-9]*.[0-9]*"\s*\?\>");
+	komentar = new RegExp("((\<\!\-\-)([^\-\-\>])*(\-\-\>))*");
+	//nije gotovo
+	pocetak_taga = new RegExp("(\<[a-zA-Z_]+[a-zA-Z_0-9]*(\ )*\>)");
 	//global variables
 	firstLine = false;
 	commentStart = false;
@@ -26,7 +31,6 @@ function checkLine(line){
 	if(commentStart) seekCommentEnd(line);
 	checkForComment(line);
 
-	var prolog = new RegExp("((\<\!\-\-)([^\-\-\>])*(\-\-\>))*\<\?xml\s+version="[0-9]*.[0-9]*"\s*\?\>");
 	if(prolog.test(line))
 	{
 
