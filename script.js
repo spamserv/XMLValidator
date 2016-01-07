@@ -1,74 +1,81 @@
 $( document ).ready(function() {
 	//global regex
-	prolog = new RegExp("\<\?xml\s+version="[0-9]*.[0-9]*"\s*\?\>");
-	komentar = new RegExp("((\<\!\-\-)([^\-\-\>])*(\-\-\>))*");
-	//nije gotovo
-	pocetak_taga = new RegExp("(\<[a-zA-Z_]+[a-zA-Z_0-9]*(\ )*\>)");
+	prolog = new RegExp("<\?xml(.)*\?>");
+	komentar = new RegExp("(\<\!\-\-).*(\-\-\>)");
+	//fali xml ime taga u svim oblicima
+	pocetak_taga = new RegExp("\<[a-zA-Z]+[a-zA-Z0-9]*( [a-zA-Z]+[a-zA-Z0-9_]*\=\"[a-zA-Z0-9_]*\")*\>");
+	self_closing = new RegExp("\<[a-zA-Z]+[a-zA-Z0-9]*( [a-zA-Z]+[a-zA-Z0-9_]*\=\"[a-zA-Z0-9_]*\")*\/\>");
+	kraj_taga = new RegExp("\<\/[a-zA-Z]+[a-zA-Z0-9]*>");
 	//global variables
 	firstLine = false;
 	commentStart = false;
 	endOfDocument = false;
 	documentLength = 0;
-	lines;
 	currentLine = 0;
 
 	output = $("#output_area");
 	$("#test").on('click', function() {
 		var inputXML = $("#input_area").val();
-		lines = inputXML.split('\n');
-		documentLength = lines.length;
-		checkLine(lines[0]);
-			//for(i = 0;i < lines.length;i++){
-    		//code here using lines[i] which will give you each line
-    		//output.append(lines[i]+'\n');
-    		//checkLine(lines[i]);
-		//}
+		text = inputXML.replace(/(\r\n|\n|\r)/gm,"");
+		prepare(text);
 	});	
 });
 
-
-function checkLine(line){
-	if(commentStart) seekCommentEnd(line);
-	checkForComment(line);
-
-	if(prolog.test(line))
-	{
-
+function prepare(xml) {
+	var final_xml = "";
+	for (i = 0; i < xml.length; i++) {
+		final_xml += xml[i];
+		if(xml[i] == ">")
+			final_xml += "\n";	
+		if(xml[i+1] == "<")
+			final_xml += "\n";
 	}
-}
-
-function checkForComment(line)
-{
-	var comment = new RegExp("<!--*");
-	if(comment.test(line)){
-		commentStart = true;
-		seekCommentEnd(line);
-	}
-}
-
-function seekCommentEnd(line)
-{
-	var commentEnd = new RegExp("-->")
-	if(commentStart)
-	{
-		if(commentEnd.test(line)){
-			commentStart = false;
-			checkLine(lines[currentLine]);
+	
+	final_lines = "";
+	lines = final_xml.split('\n');
+	lines.forEach(function(line) {
+		if(line[0] == "<") { 
+			final_lines += line + "\n";
 		}
-		else{
-			currentLine++;
-			checkLine(lines[currentLine]);
-		}
-	}
+	});
+	
+	check(final_lines);
 }
 
-
+function check(xml) {
+	xml = xml.split('\n');
+	has_prolog = false;
+	attribute_stack = [];
+	error_stack = [];
+	
+	xml.forEach(function(line) {
+		if(komentar.test(line) || line[0] != "<")
+			return;
+		
+		if(!has_prolog) {
+			if(!prolog.test(line) && !pocetak_taga.test(line))
+				console.log("Error u prologu");
+			has_prolog = true;
+		}
+		
+		console.log(pocetak_taga.test(line));
+		if(pocetak_taga.test(line)) {
+			//tag_name = line.substring(1,line.indexOf(' '));
+			//console.log(line.indexOf(' '));
+			//push na stog
+		}
+		
+		if(kraj_taga.test(line)) {
+			//pop sa stoga (provjerit što vraća i jel dobar tag zatvoren)
+		}
+		console.log(line);
+	});
+}
 
 /*
 1. Učitaj liniju
 2. Provjeri je li linija = komentar
-3. Provjeri je li zatvoren komentar i dokle god nije (je li zatvoren 
-u istom retku ili u n-tom retku, čekaj da se zatvori) <-- funkcija koja provjerava to
+3. Provjeri je li zatvoren komentar i dokle god nije (je li zatvoren u istom retku ili u n-tom retku, čekaj da se zatvori) <-- funkcija koja provjerava to
 4. seekCommentEnd
 5. flag --> prolog ?   postoji : ne postoji
 6. Ako postoji,provjeri je li dobar prolog,ako nije alert
