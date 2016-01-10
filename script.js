@@ -38,7 +38,7 @@ function prepare(xml) {
 			final_lines += line + "\n";
 		}
 	});
-	
+
 	check(final_lines);
 }
 
@@ -48,40 +48,51 @@ function check(xml) {
 	attribute_stack = [];
 	error_stack = [];
 	
+	output = $("#output_area");
+
 	xml.forEach(function(line) {
+		
 		if(komentar.test(line) || line[0] != "<")
 			return;
 		
 		if(!has_prolog) {
 			if(!prolog.test(line) && !pocetak_taga.test(line))
-				console.log("Error u prologu");
+				error_stack.push("Pogreska u prologu.");
 			has_prolog = true;
 		}
 		
-		console.log(pocetak_taga.test(line));
 		if(pocetak_taga.test(line)) {
-			//tag_name = line.substring(1,line.indexOf(' '));
-			//console.log(line.indexOf(' '));
-			//push na stog
+			if(line.indexOf(' ') == -1) {
+				tag_name = line.substring(1,line.indexOf('>'));
+			} else {
+				tag_name = line.substring(1,line.indexOf(' '));
+			}
+			attribute_stack.push(tag_name);
 		}
 		
 		if(kraj_taga.test(line)) {
-			//pop sa stoga (provjerit što vraća i jel dobar tag zatvoren)
+			tag_name = line.substring(2,line.indexOf('>'));
+
+			popped_tag = attribute_stack.pop();
+
+			if(tag_name != popped_tag) {
+				error_stack.push("TAG : '" + tag_name + "' nije nikada otvoren.");
+			}
+
 		}
-		console.log(line);
+
 	});
+
+	if(attribute_stack.length != 0) {
+		error = attribute_stack.length == 1 ? "Tag: " : "Tagovi: ";
+		attribute_stack.forEach(function(er) {
+			error += "'" + er + "', ";
+		});
+		error = error.substring(0,error.length-2);
+		error += attribute_stack.length == 1 ? " nije nikada zatvoren." : " nisu nikada zatvoreni.";
+		error_stack.push(error);
+	}
+
+	console.log(attribute_stack);
+	console.log(error_stack);
 }
-
-/*
-1. Učitaj liniju
-2. Provjeri je li linija = komentar
-3. Provjeri je li zatvoren komentar i dokle god nije (je li zatvoren u istom retku ili u n-tom retku, čekaj da se zatvori) <-- funkcija koja provjerava to
-4. seekCommentEnd
-5. flag --> prolog ?   postoji : ne postoji
-6. Ako postoji,provjeri je li dobar prolog,ako nije alert
-7. Ispitaj XML tag, ukoliko nije ni komentar ni prolog i spremi mu sve atribute u neki OBJEKT IL AREJ
-8. Traži kraj XML taga i jesu li svi zatvoreni koji su otvoreni. (tag unutar tag-a)
-*/
-
-//TO DO
-// provjeri je li komentar unutar tag-a <tag <!-- --> > u funkciji checkForComment
