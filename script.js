@@ -51,6 +51,8 @@ function check(xml) {
 	output = $("#output_area");
 
 	xml.forEach(function(line) {
+
+		anything = false;
 		
 		if(komentar.test(line) || line[0] != "<")
 			return;
@@ -59,6 +61,7 @@ function check(xml) {
 			if(!prolog.test(line) && !pocetak_taga.test(line))
 				error_stack.push("Pogreska u prologu.");
 			has_prolog = true;
+			anything = true;
 		}
 		
 		if(pocetak_taga.test(line)) {
@@ -68,6 +71,7 @@ function check(xml) {
 				tag_name = line.substring(1,line.indexOf(' '));
 			}
 			attribute_stack.push(tag_name);
+			anything = true;
 		}
 		
 		if(kraj_taga.test(line)) {
@@ -78,7 +82,14 @@ function check(xml) {
 			if(tag_name != popped_tag) {
 				error_stack.push("TAG : '" + tag_name + "' nije nikada otvoren.");
 			}
+			anything = true;
+		}
 
+		if(self_closing.test(line))
+			anything = true;
+
+		if(!anything) {
+			error_stack.push("Tag: '"+line+"' ne odgovara niti jednoj od mogućih opcija.");
 		}
 
 	});
