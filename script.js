@@ -2,18 +2,10 @@ $( document ).ready(function() {
 	//global regex
 	prolog = new RegExp("<\?xml(.)*\?>");
 	komentar = new RegExp("(\<\!\-\-).*(\-\-\>)");
-	//fali xml ime taga u svim oblicima
 	pocetak_taga = new RegExp("\<[a-zA-Z]+[a-zA-Z0-9]*( [a-zA-Z]+[a-zA-Z0-9_]*\=\"[a-zA-Z0-9_]*\")*\>");
 	self_closing = new RegExp("\<[a-zA-Z]+[a-zA-Z0-9]*( [a-zA-Z]+[a-zA-Z0-9_]*\=\"[a-zA-Z0-9_]*\")*\/\>");
 	kraj_taga = new RegExp("\<\/[a-zA-Z]+[a-zA-Z0-9]*>");
-	//global variables
-	firstLine = false;
-	commentStart = false;
-	endOfDocument = false;
-	documentLength = 0;
-	currentLine = 0;
 
-	output = $("#output_area");
 	$("#test").on('click', function() {
 		var inputXML = $("#input_area").val();
 		text = inputXML.replace(/(\r\n|\n|\r)/gm,"");
@@ -59,7 +51,7 @@ function check(xml) {
 		
 		if(!has_prolog) {
 			if(!prolog.test(line) && !pocetak_taga.test(line))
-				error_stack.push("Pogreska u prologu.");
+				error_stack.push("Pogreška u prologu.");
 			has_prolog = true;
 			anything = true;
 		}
@@ -80,7 +72,7 @@ function check(xml) {
 			popped_tag = attribute_stack.pop();
 
 			if(tag_name != popped_tag) {
-				error_stack.push("TAG : '" + tag_name + "' nije nikada otvoren.");
+				error_stack.push("Tag : '" + tag_name + "' nije nikada otvoren.");
 			}
 			anything = true;
 		}
@@ -104,6 +96,20 @@ function check(xml) {
 		error_stack.push(error);
 	}
 
-	console.log(attribute_stack);
-	console.log(error_stack);
+	//output errors
+	panel = $("#debug-panel");
+	output = $("#output_area");
+	output.val("");
+	if(error_stack.length != 0) {
+		panel.removeClass('panel-success').addClass('panel-danger');
+		error_stack.forEach(function(el) {
+			val = output.val();
+			output.val(val + el + "\r\n");
+		});
+	} else {
+		panel.removeClass('panel-danger').addClass('panel-success');
+		output.val("No errors found.");
+	}
+	
+
 }
