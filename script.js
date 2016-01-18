@@ -1,10 +1,11 @@
 $( document ).ready(function() {
 	//global regex
 	prolog = /<\?xml(( version=\"[0-9](.[0-9])*\")| (encoding=\"[a-zA-Z_][a-zA-Z0-9_]*\")| standalone=\"(yes|no)\")*\?>/i;
+	nedozvoljena_sintaksa = /<(xml.*>|[a-zA-Z_-][a-zA-Z0-9_-]* xml="[a-zA-Z_-][a-zA-Z_-]*"( [a-zA-Z_-][a-zA-Z0-9_-]*="[a-zA-Z_-][a-zA-Z_-]*")*>)+/i;
 	komentar = /(<\!\-\-).*(\-\-\>)/;
-	pocetak_taga = /<[a-zA-Z_][a-zA-Z0-9_]*( [a-zA-Z_][a-zA-Z0-9_]*\=\"[a-zA-Z0-9_]*\")*>/;
-	self_closing = /<[a-zA-Z_][a-zA-Z0-9_]*( [a-zA-Z_][a-zA-Z0-9_]*\=\"[a-zA-Z0-9_]*\")*\/>/;
-	kraj_taga = /<\/[a-zA-Z_][a-zA-Z0-9_]*>/;
+	pocetak_taga = /<[a-zA-Z_][a-zA-Z0-9_-]*( [a-zA-Z_][a-zA-Z0-9_-]*\=\"[a-zA-Z0-9_-]*\")*>/;
+	self_closing = /<[a-zA-Z_][a-zA-Z0-9_-]*( [a-zA-Z_][a-zA-Z0-9_-]*\=\"[a-zA-Z0-9_-]*\")*\/>/;
+	kraj_taga = /<\/[a-zA-Z_][a-zA-Z0-9_-]*>/;
 
 	$("#test").on('click', function() {
 		var inputXML = $("#input_area").val();
@@ -56,6 +57,8 @@ function check(xml) {
 		}
 		
 		if(pocetak_taga.test(line)) {
+			if(nedozvoljena_sintaksa.test(line))
+				error_stack.push("Nevaljana sintaksa (pojava ključne riječi XML kao tag name ili property name");
 			if(line.indexOf(' ') == -1) {
 				tag_name = line.substring(1,line.indexOf('>'));
 			} else {
