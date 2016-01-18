@@ -74,7 +74,7 @@ function check(xml) {
 			popped_tag = attribute_stack.pop();
 
 			if(tag_name != popped_tag) {
-				error_stack.push("Tag : '" + popped_tag + "' nije nikada zatvoren.");
+				error_stack.push("Očekuje se zatvaranje taga : '</" + popped_tag + ">'.");
 			}
 			anything = true;
 		}
@@ -83,7 +83,7 @@ function check(xml) {
 			anything = true;
 
 		if(!anything) {
-			error_stack.push("Tag: '"+line+"' ne odgovara niti jednoj od mogućih opcija.");
+			error_stack.push("Tag: '"+line+"' nije ispravna sintaksa xml taga.");
 		}
 
 	});
@@ -97,6 +97,8 @@ function check(xml) {
 		error += attribute_stack.length == 1 ? " nije nikada zatvoren." : " nisu nikada zatvoreni.";
 		error_stack.push(error);
 	}
+	
+	
 
 	//output errors
 	panel = $("#debug-panel");
@@ -110,7 +112,7 @@ function check(xml) {
 		});
 	} else {
 		panel.removeClass('panel-danger').addClass('panel-success');
-		output.val("No errors found.");
+		output.val("Ispravan XML.");
 	}
 	
 
