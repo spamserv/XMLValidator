@@ -57,7 +57,7 @@ function check(xml) {
 
 			if(i+1 < line.length) {
 				if(!kraj_taga.test(line[i+1])) {
-					error_stack.push("Očekuje se zatvaranje taga: "+line[i-1]);
+					error_stack.push("Očekuje se zatvaranje taga: \r\n"+line[i-1]+"\n");
 				} else {
 					tag_name = line[i+1].substring(2,line[i+1].indexOf('>'));
 					popped_tag = attribute_stack.pop();
@@ -98,8 +98,20 @@ function check(xml) {
 
 			popped_tag = attribute_stack.pop();
 
+			final_open = '';
+			final_close = '';
+			vechi = popped_tag > tag_name ? (popped_tag.length) : (tag_name.length);
 			if(tag_name != popped_tag) {
-				error_stack.push("Očekuje se zatvaranje taga: <" + popped_tag + ">");
+				for(i=0;i<vechi;i++){
+					if(tag_name[i] == popped_tag[i]){
+						final_open+='<span class="ok">'+((popped_tag[i] != undefined) ? popped_tag[i] : '')+'</span>';
+						final_close+='<span class="ok">'+((tag_name[i] != undefined) ? tag_name[i] : '')+'</span>';
+					}else{
+						final_open+='<span class="ok">'+((popped_tag[i] != undefined) ? popped_tag[i] : '')+'</span>';
+						final_close+='<span class="bad">'+((tag_name[i] != undefined) ? tag_name[i] : '')+'</span>';
+					}
+				}
+				error_stack.push("<div>Očekuje se zatvaranje taga: <br> "+final_open+"<br>"+final_close+"<br></div>");
 			}
 			anything = true;
 			tag_opened = false;
@@ -134,7 +146,8 @@ function check(xml) {
 		panel.removeClass('panel-success').addClass('panel-danger');
 		error_stack.forEach(function(el) {
 			val = output.val();
-			output.val(val + el + "\r\n");
+			$("#izlaz").html(el);
+			output.text(val + el + "\r\n");
 		});
 	} else {
 		panel.removeClass('panel-danger').addClass('panel-success');
