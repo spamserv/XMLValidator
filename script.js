@@ -100,9 +100,9 @@ function check(xml) {
 
 			final_open = '';
 			final_close = '';
-			vechi = popped_tag > tag_name ? (popped_tag.length) : (tag_name.length);
+			veci = popped_tag > tag_name ? (popped_tag.length) : (tag_name.length);
 			if(tag_name != popped_tag) {
-				for(i=0;i<vechi;i++){
+				for(i=0;i<veci;i++){
 					if(tag_name[i] == popped_tag[i]){
 						final_open+='<span class="ok">'+((popped_tag[i] != undefined) ? popped_tag[i] : '')+'</span>';
 						final_close+='<span class="ok">'+((tag_name[i] != undefined) ? tag_name[i] : '')+'</span>';
@@ -140,18 +140,16 @@ function check(xml) {
 
 	//output errors
 	panel = $("#debug-panel");
-	output = $("#output_area");
-	output.val("");
+	output = $("#izlaz");
+	output.html("");
 	if(error_stack.length != 0) {
 		panel.removeClass('panel-success').addClass('panel-danger');
 		error_stack.forEach(function(el) {
-			val = output.val();
-			$("#izlaz").html(el);
-			output.text(val + el + "\r\n");
+			output.html(el);
 		});
 	} else {
 		panel.removeClass('panel-danger').addClass('panel-success');
-		output.val("Ispravan XML.");
+		output.html("Ispravan XML.");
 	}
 	
 
