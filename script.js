@@ -23,70 +23,96 @@ function prepare(xml) {
 		if(xml[i+1] == "<")
 			final_xml += "\n";
 	}
-	
+
 	final_lines = "";
 	lines = final_xml.split('\n');
+	
 	lines.forEach(function(line) {
 		if(line[0] == "<") { 
 			final_lines += line + "\n";
 		}
 	});
-	check(final_lines);
+	check(final_xml);
 }
 
 function check(xml) {
-	xml = xml.split('\n');
+	line = xml.split('\n');
 	has_prolog = false;
 	attribute_stack = [];
 	error_stack = [];
 	
 	output = $("#output_area");
 
-	xml.forEach(function(line) {
+	tag_opened = false;
+
+	for (var i = 0; i < line.length; i++) 
+	{	
+		if(error_stack.length > 0) {
+			i=line.length;
+			attribute_stack = [];
+			continue;
+		}
+
+		if(tag_opened && !pocetak_taga.test(line[i]) && !(line[i].trim()==='') && !komentar.test(line[i])) {
+
+			if(i+1 < line.length) {
+				if(!kraj_taga.test(line[i+1])) {
+					error_stack.push("Očekuje se zatvaranje taga: "+line[i-1]);
+				} else {
+					tag_name = line[i+1].substring(2,line[i+1].indexOf('>'));
+					popped_tag = attribute_stack.pop();
+					attribute_stack.push(popped_tag);
+				}
+
+				tag_opened = false;
+			}
+		}
 
 		anything = false;
 		
-		if(komentar.test(line) || line[0] != "<")
-			return;
+		if(komentar.test(line[i]) || line[i][0] != "<")
+			continue;
 		
 		if(!has_prolog) {
-			if(!prolog.test(line) && !pocetak_taga.test(line))
+			if(!prolog.test(line[i]) && !pocetak_taga.test(line[i]))
 				error_stack.push("Pogreška u prologu.");
 			has_prolog = true;
 			anything = true;
 		}
 		
-		if(pocetak_taga.test(line)) {
-			if(nedozvoljena_sintaksa.test(line))
+		if(pocetak_taga.test(line[i])) {
+			if(nedozvoljena_sintaksa.test(line[i]))
 				error_stack.push("Nevaljana sintaksa (pojava ključne riječi XML kao tag name ili property name");
-			if(line.indexOf(' ') == -1) {
-				tag_name = line.substring(1,line.indexOf('>'));
+			if(line[i].indexOf(' ') == -1) {
+				tag_name = line[i].substring(1,line[i].indexOf('>'));
 			} else {
-				tag_name = line.substring(1,line.indexOf(' '));
+				tag_name = line[i].substring(1,line[i].indexOf(' '));
 			}
 			attribute_stack.push(tag_name);
 			anything = true;
+			tag_opened = true;
 		}
 		
-		if(kraj_taga.test(line)) {
-			tag_name = line.substring(2,line.indexOf('>'));
+		if(kraj_taga.test(line[i])) {
+			tag_name = line[i].substring(2,line[i].indexOf('>'));
 
 			popped_tag = attribute_stack.pop();
 
 			if(tag_name != popped_tag) {
-				error_stack.push("Očekuje se zatvaranje taga : '</" + popped_tag + ">'.");
+				error_stack.push("Očekuje se zatvaranje taga: <" + popped_tag + ">");
 			}
 			anything = true;
+			tag_opened = false;
 		}
 
-		if(self_closing.test(line))
+		if(self_closing.test(line[i]))
 			anything = true;
 
 		if(!anything) {
-			error_stack.push("Tag: '"+line+"' nije ispravna sintaksa xml taga.");
+			error_stack.push("Tag: '"+line[i]+"' nije ispravna sintaksa xml taga.");
 		}
 
-	});
+	}
 
 	if(attribute_stack.length != 0) {
 		error = attribute_stack.length == 1 ? "Tag: " : "Tagovi: ";
