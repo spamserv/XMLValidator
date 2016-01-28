@@ -55,7 +55,7 @@ function check(xml) {
 			}
 
 			/* Provjera ukoliko se iza otvorenog taga nalazi teks koji nije komentar ili otvoreni tag, te nije zatvoreni tag a mora biti da se javi greška */
-			if(tag_otvoren && !otvoreni_tag.test(line[i]) && !(line[i].trim()==='') && !komentar.test(line[i])) {
+			if(tag_otvoren && !otvoreni_tag.test(line[i]) && !(line[i].trim()==='') && !komentar.test(line[i]) && !self_closing.test(line[i])) {
 
 				/* Provjera zbog errora budući da se može javiti error u posljednjoj liniji */
 				if(i+1 < line.length) {
@@ -142,7 +142,7 @@ function check(xml) {
 
 			/* Provjera je li linija self closing tag ili komentar, ukoliko jest program nastavlja dalje */
 			if(self_closing.test(line[i]) || komentar.test(line[i]))
-				bilo_sto = true;
+				continue;
 
 			/* Provjera je li zadana linija bilo što od gore, ako nije tada je to nešto nedozvoljeno */
 			if(!bilo_sto) {
@@ -169,7 +169,7 @@ function check(xml) {
 				else
 					tag_to_ispis += stog_atributa[i];
 			};
-			ispis("Slijedeći tagovi nisu zatvoreni: "+tag_to_ispis,true);
+			ispis("Sljedeći tagovi nisu zatvoreni: "+tag_to_ispis,true);
 			error_postoji = true;
 
 		/* Ukoliko nemamo errora, javljamo da je sve OK -> ispravan XML */
